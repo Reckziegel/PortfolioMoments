@@ -20,8 +20,10 @@ A variance-covariance matrix.
 Implements the covariance matrix described in Ledoit & Wold (2003).
 }
 \examples{
-cov_shrink_to_honey(EuStockMarkets)
-cov_shrink_to_honey(EUStockMarkets, portfolio = FALSE)
+library(PortfolioAnalytics)
+data(edhec)
+cov_shrink_to_honey(edhec)
+cov_shrink_to_honey(edhec, portfolio = FALSE)
 }
 \references{
 Ledoit, Olivier, and Michael Wolf. \emph{Honey, I shrunk the sample covariance matrix.} UPF economics and business working paper 691 (2003).

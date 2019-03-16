@@ -16,7 +16,9 @@ A variance-covariance matrix.
 Implements the variance-covariance matrix as described in Jorrion (1986),
 }
 \examples{
-cov_shrink_bayes_stein(EuStockMarkets)
+library(PortfolioAnalytics)
+data(edhec)
+cov_shrink_to_bayes_stein(edhec)
 }
 \references{
 Jorion, Philippe. \emph{Bayes-Stein Estimation For Portfolio Analysis}. Journal of Financial and Quantitative Analysis 21.3 (1986): 279-292.

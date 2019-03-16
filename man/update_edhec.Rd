@@ -2,9 +2,9 @@
 % Please edit documentation in R/update_edhec.R
 \name{update_edhec}
 \alias{update_edhec}
-\title{Title}
+\title{Update the EDHEC}
 \usage{
-update_edhec(class)
+update_edhec(class = NULL)
 }
 \arguments{
 \item{class}{One of 'tbl', 'xts', 'zoo', 'zooreg' or 'ts'.}
@@ -17,8 +17,7 @@ Download an updated version of the Edhec Headge Fund index.
 }
 \examples{
 # xts object
-update_edhec('xts') \%>\%
-  head()
+head(update_edhec('xts'))
 
 # tibble object
 update_edhec('tbl')

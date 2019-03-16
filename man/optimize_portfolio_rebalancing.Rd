@@ -7,7 +7,6 @@
 \alias{optimize_portfolio_rebalancing.xts}
 \alias{optimize_portfolio_rebalancing.zoo}
 \alias{optimize_portfolio_rebalancing.data.frame}
-\alias{optimize_portfolio_rebalancing.tbl_df}
 \title{Optimize and Rebalance Portfolios Using Custom Functions}
 \usage{
 optimize_portfolio_rebalancing(R, ...)
@@ -21,9 +20,6 @@ optimize_portfolio_rebalancing(R, ...)
 \method{optimize_portfolio_rebalancing}{zoo}(R, ...)
 
 \method{optimize_portfolio_rebalancing}{data.frame}(R, ...)
-
-\method{optimize_portfolio_rebalancing}{tbl_df}(R, select, date_var,
-  silent = TRUE, ...)
 }
 \arguments{
 \item{R}{An xts, matrix, data frame, timeSeries, zoo or tibble object of asset returns. The data cannot be "tidy".}
@@ -41,26 +37,31 @@ As explained in the vignette "Custom Moment and Objective Functions", Portfolio 
 }
 \examples{
 # load data
+library(dplyr)
+library(PortfolioAnalytics)
 data(edhec)
 
 # create a mean-variance portfolio (long-only)
-# that uses the \\code{auto.arima} function from the \\code{forecast} package as one step ahead forecasts for the mean
+# that uses the \\code{auto.arima} function from the \\code{forecast} package
+# as one step ahead forecasts for the mean
 # and the famous "Bayes-Stein" estimator the covariance
 mean_var_spec <- portfolio.spec(assets = colnames(edhec)) \%>\%
- add.constraint(portfolio = ., type = "box", min = 0.00, max = 1.00) \%>\%
- add.objective(portfolio = ., type = "risk", name = "var") \%>\%
- add.objective(portfolio = ., type = "return", name = "mean")
+ add.constraint(type = "box", min = 0.00, max = 1.00) \%>\%
+ add.objective(type = "risk", name = "var") \%>\%
+ add.objective(type = "return", name = "mean")
 
 optimize_portfolio_rebalancing(
-    R = edhec,
-    portfolio = mean_var_spec,
-    optimize_method = 'ROI',
-    rebalance_on = "months",
-    training_period = 60,
-    rolling_window = 60,
-    search_size = 500,
-    mu = ets,
-    sigma = shrink_bayes_stein
+    R               = edhec,
+    portfolio       = mean_var_spec,
+    optimize_method = 'random',
+    rebalance_on    = "months",
+    training_period = 120,
+    rolling_window  = 120,
+    search_size     = 100,
+    mu              = forecast::ets,
+    sigma           = cov_shrink_to_bayes_stein,
+    message         = FALSE,
+    trace           = FALSE
 )
 
 
@@ -69,15 +70,17 @@ optimize_portfolio_rebalancing(
 
 \dontrun{
 optimize_portfolio(
-    R = edhec,
-    portfolio = mean_var_spec,
-    optimize_method = 'ROI',
-    rebalance_on = "months",
-    training_period = 60,
-    rolling_window = 60,
-    search_size = 500,
-    mu = ~ auto.arima(., max.p = 2, max.q = 2, seasonal = FALSE)
-    sigma = shrink_bayes_stein #PortfolioMoments package
+    R               = edhec,
+    portfolio       = mean_var_spec,
+    optimize_method = 'random',
+    rebalance_on    = "months",
+    training_period = 120,
+    rolling_window  = 120,
+    search_size     = 100,
+    mu              = ~ forecast::auto.arima(., max.p = 2, max.q = 2, seasonal = FALSE),
+    sigma           = cov_shrink_to_bayes_stein,
+    message         = FALSE,
+    trace           = FALSE
 )
 }
 }

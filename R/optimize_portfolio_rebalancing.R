@@ -15,26 +15,31 @@
 #'
 #' @examples
 #' # load data
+#' library(dplyr)
+#' library(PortfolioAnalytics)
 #' data(edhec)
 #'
 #' # create a mean-variance portfolio (long-only)
-#' # that uses the \code{auto.arima} function from the \code{forecast} package as one step ahead forecasts for the mean
+#' # that uses the \code{auto.arima} function from the \code{forecast} package
+#' # as one step ahead forecasts for the mean
 #' # and the famous "Bayes-Stein" estimator the covariance
 #' mean_var_spec <- portfolio.spec(assets = colnames(edhec)) %>%
-#'  add.constraint(portfolio = ., type = "box", min = 0.00, max = 1.00) %>%
-#'  add.objective(portfolio = ., type = "risk", name = "var") %>%
-#'  add.objective(portfolio = ., type = "return", name = "mean")
+#'  add.constraint(type = "box", min = 0.00, max = 1.00) %>%
+#'  add.objective(type = "risk", name = "var") %>%
+#'  add.objective(type = "return", name = "mean")
 #'
 #' optimize_portfolio_rebalancing(
-#'     R = edhec,
-#'     portfolio = mean_var_spec,
-#'     optimize_method = 'ROI',
-#'     rebalance_on = "months",
-#'     training_period = 60,
-#'     rolling_window = 60,
-#'     search_size = 500,
-#'     mu = ets,
-#'     sigma = shrink_bayes_stein
+#'     R               = edhec,
+#'     portfolio       = mean_var_spec,
+#'     optimize_method = 'random',
+#'     rebalance_on    = "months",
+#'     training_period = 120,
+#'     rolling_window  = 120,
+#'     search_size     = 100,
+#'     mu              = forecast::ets,
+#'     sigma           = cov_shrink_to_bayes_stein,
+#'     message         = FALSE,
+#'     trace           = FALSE
 #' )
 #'
 #'
@@ -43,15 +48,17 @@
 #'
 #' \dontrun{
 #' optimize_portfolio(
-#'     R = edhec,
-#'     portfolio = mean_var_spec,
-#'     optimize_method = 'ROI',
-#'     rebalance_on = "months",
-#'     training_period = 60,
-#'     rolling_window = 60,
-#'     search_size = 500,
-#'     mu = ~ auto.arima(., max.p = 2, max.q = 2, seasonal = FALSE)
-#'     sigma = shrink_bayes_stein #PortfolioMoments package
+#'     R               = edhec,
+#'     portfolio       = mean_var_spec,
+#'     optimize_method = 'random',
+#'     rebalance_on    = "months",
+#'     training_period = 120,
+#'     rolling_window  = 120,
+#'     search_size     = 100,
+#'     mu              = ~ forecast::auto.arima(., max.p = 2, max.q = 2, seasonal = FALSE),
+#'     sigma           = cov_shrink_to_bayes_stein,
+#'     message         = FALSE,
+#'     trace           = FALSE
 #' )
 #' }
 optimize_portfolio_rebalancing <- function(R, ...) {
@@ -67,7 +74,7 @@ optimize_portfolio_rebalancing <- function(R, ...) {
 #' @export
 optimize_portfolio_rebalancing.default <- function(R, ...) {
 
-  stop('optimize_portfolio_rebalancing does not know how to deal with class ', class(R))
+  stop('optimize_portfolio_rebalancing does not know how to deal with class ', class(R), call. = FALSE)
 
 }
 
@@ -78,9 +85,9 @@ optimize_portfolio_rebalancing.default <- function(R, ...) {
 #' @export
 optimize_portfolio_rebalancing.matrix <- function(R, ...) {
 
-  #R <- PerformanceAnalytics::checkData(R, method = 'matrix')
+  R <- PerformanceAnalytics::checkData(R)
 
-  PortfolioAnalytics::optimize.portfolio.rebalancing(R, ..., momentFUN = portfolio_moments)
+  PortfolioAnalytics::optimize.portfolio.rebalancing(R, momentFUN = portfolio_moments, ...)
 
 }
 
@@ -91,9 +98,9 @@ optimize_portfolio_rebalancing.matrix <- function(R, ...) {
 #' @export
 optimize_portfolio_rebalancing.xts <- function(R, ...) {
 
-  #R <- PerformanceAnalytics::checkData(R, method = 'xts')
+  R <- PerformanceAnalytics::checkData(R)
 
-  PortfolioAnalytics::optimize.portfolio.rebalancing(R, ..., momentFUN = portfolio_moments)
+  PortfolioAnalytics::optimize.portfolio.rebalancing(R, momentFUN = portfolio_moments, ...)
 
 }
 
@@ -104,9 +111,9 @@ optimize_portfolio_rebalancing.xts <- function(R, ...) {
 #' @export
 optimize_portfolio_rebalancing.zoo <- function(R, ...) {
 
-  #R <- PerformanceAnalytics::checkData(R, method = 'xoo')
+  R <- PerformanceAnalytics::checkData(R)
 
-  PortfolioAnalytics::optimize.portfolio.rebalancing(R, ..., momentFUN = portfolio_moments)
+  PortfolioAnalytics::optimize.portfolio.rebalancing(R, momentFUN = portfolio_moments, ...)
 
 }
 
@@ -117,22 +124,22 @@ optimize_portfolio_rebalancing.zoo <- function(R, ...) {
 #' @export
 optimize_portfolio_rebalancing.data.frame <- function(R, ...) {
 
-  #R <- PerformanceAnalytics::checkData(R, method = 'data.frame')
+  R <- PerformanceAnalytics::checkData(R)
 
-  PortfolioAnalytics::optimize.portfolio.rebalancing(R, ..., momentFUN = portfolio_moments)
+  PortfolioAnalytics::optimize.portfolio.rebalancing(R, momentFUN = portfolio_moments, ...)
 
 }
 
 
 # tibble ------------------------------------------------------------------
-
-#' @rdname optimize_portfolio_rebalancing
-#' @export
-optimize_portfolio_rebalancing.tbl_df <- function(R, select, date_var, silent = TRUE, ...) {
-
-  R <- timetk::tk_xts(data = R, select = select, date_var = date_var, silent = silent)
-
-  PortfolioAnalytics::optimize.portfolio.rebalancing(R, ..., momentFUN = portfolio_moments)
-
-}
+##
+##' # rdname optimize_portfolio_rebalancing
+##' # export
+##' optimize_portfolio_rebalancing.tbl_df <- function(R, select, date_var, silent = TRUE, ...) {
+##'
+##'   R <- timetk::tk_xts(data = R, select = select, date_var = date_var, silent = silent)
+##'
+##'   PortfolioAnalytics::optimize.portfolio.rebalancing(R, momentFUN = portfolio_moments, ...)
+##'
+##' }
 

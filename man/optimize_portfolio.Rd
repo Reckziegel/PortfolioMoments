@@ -7,7 +7,6 @@
 \alias{optimize_portfolio.xts}
 \alias{optimize_portfolio.zoo}
 \alias{optimize_portfolio.data.frame}
-\alias{optimize_portfolio.tbl_df}
 \title{Optimize Portfolios Using Custom Functions}
 \usage{
 optimize_portfolio(R, ...)
@@ -21,12 +20,10 @@ optimize_portfolio(R, ...)
 \method{optimize_portfolio}{zoo}(R, ...)
 
 \method{optimize_portfolio}{data.frame}(R, ...)
-
-\method{optimize_portfolio}{tbl_df}(R, select, date_var, silent = TRUE,
-  ...)
 }
 \arguments{
-\item{R}{An xts, matrix, data frame, timeSeries, zoo or tibble object of asset returns. The data cannot be "tidy".}
+\item{R}{An xts, matrix, data frame, timeSeries, zoo or tibble object of asset returns.
+The data cannot be "tidy".}
 
 \item{...}{Any other paramenters to be passed into [PortfolioAnalytics::optimize.portfolio()].}
 }
@@ -34,30 +31,36 @@ optimize_portfolio(R, ...)
 Same output of \code{optimize.portfolio}.
 }
 \description{
-A wrapper around \code{optimize.portfolio} that allows the user to quickly add forecasts for mean and variance.
+A wrapper around \code{optimize.portfolio} that allows the user to quickly add
+    forecasts for mean and variance.
 }
 \details{
-As explained in the vignette "Custom Moment and Objective Functions", Portfolio Analytics works more efficiently when the mean is specified as _mu_ and the variance as _sigma_.
+As explained in the vignette "Custom Moment and Objective Functions", Portfolio Analytics
+    works more efficiently when the mean is specified as _mu_ and the variance as _sigma_.
 }
 \examples{
 # load data
+library(dplyr)
+library(PortfolioAnalytics)
 data(edhec)
 
 # create a mean-variance portfolio (long-only)
-# that uses the \\code{auto.arima} function from the \\code{forecast} package as one step ahead forecasts for the mean
-# and the famous "Bayes-Stein" estimator the covariance
+# that uses the \\code{auto.arima} function from the \\code{forecast} package as one step
+# ahead forecasts for the mean and the famous "Bayes-Stein" estimator the covariance
 mean_var_spec <- portfolio.spec(assets = colnames(edhec)) \%>\%
  add.constraint(portfolio = ., type = "box", min = 0.00, max = 1.00) \%>\%
  add.objective(portfolio = ., type = "risk", name = "var") \%>\%
  add.objective(portfolio = ., type = "return", name = "mean")
 
 optimize_portfolio(
-    R = edhec,
-    portfolio = mean_var_spec,
-    optimize_method = 'ROI',
-    search_size = 500,
-    mu = auto.arima,           # \\code{forecast} package
-    sigma = shrink_bayes_stein # \\code{PortfolioMoments} package
+    R               = edhec,
+    portfolio       = mean_var_spec,
+    optimize_method = 'random',
+    search_size     = 500,
+    mu              = forecast::auto.arima,
+    sigma           = cov_shrink_to_bayes_stein,
+    message         = FALSE,
+    trace           = FALSE
 )
 
 
@@ -66,12 +69,14 @@ optimize_portfolio(
 
 \dontrun{
 optimize_portfolio(
-    R = edhec,
-    portfolio = mean_var_spec,
-    optimize_method = 'ROI',
-    search_size = 500,
-    mu = ~ auto.arima(., max.p = 2, max.q = 2, seasonal = FALSE)
-    sigma = shrink_bayes_stein #PortfolioMoments package
+    R               = edhec,
+    portfolio       = mean_var_spec,
+    optimize_method = 'random',
+    search_size     = 500,
+    mu              = ~ forecast::auto.arima(., max.p = 2, max.q = 2, seasonal = FALSE),
+    sigma           = cov_shrink_to_bayes_stein,
+    message         = FALSE,
+    trace           = FALSE
 )
 }
 

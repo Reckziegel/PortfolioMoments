@@ -1,38 +1,38 @@
-repmat <- function(x, m, n) {
-
-  # check the class
-  if (is.matrix(x)) {
-
-    mx <- dim(x)[1]
-    nx <- dim(x)[2]
-
-  } else if (is.atomic(x)) {
-
-    mx <- 1
-    nx <- length(x)
-
-  } else {
-
-    stop('x must be numeric or a matrix.')
-
-  }
-
-  matrix(data  = matrix(data = x, nrow = mx, ncol = nx * n),
-         nrow  = mx * m,
-         ncol  = nx * n,
-         byrow = TRUE)
-
-}
-
-
-squeeze <- function (x)  {
-
-  # The same as the squeeze function in MATLAB
-  d <- dim(x)
-  dim(x) <- d[d > 1]
-  x
-
-}
+# repmat <- function(x, m, n) {
+#
+#   # check the class
+#   if (is.matrix(x)) {
+#
+#     mx <- dim(x)[1]
+#     nx <- dim(x)[2]
+#
+#   } else if (is.atomic(x)) {
+#
+#     mx <- 1
+#     nx <- length(x)
+#
+#   } else {
+#
+#     stop('x must be numeric or a matrix.')
+#
+#   }
+#
+#   matrix(data  = matrix(data = x, nrow = mx, ncol = nx * n),
+#          nrow  = mx * m,
+#          ncol  = nx * n,
+#          byrow = TRUE)
+#
+# }
+#
+#
+# squeeze <- function (x)  {
+#
+#   # The same as the squeeze function in MATLAB
+#   d <- dim(x)
+#   dim(x) <- d[d > 1]
+#   x
+#
+# }
 
 
 # .validate_mu <- function(mu) {

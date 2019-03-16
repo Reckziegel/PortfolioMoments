@@ -18,7 +18,7 @@
 cov_ewma <- function(R, lambda = 0.96) {
 
   rows <- nrow(R)
-  sample_sigma <- cov(R)
+  sample_sigma <- stats::cov(R)
 
   mu <- apply(R, 2, mean)
   discount_mu <- sweep(R, 2, mu, "-")

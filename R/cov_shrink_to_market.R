@@ -25,7 +25,7 @@ cov_shrink_to_market <- function(R, shrink = TRUE, portfolio = TRUE) {
   R     <- sweep(R, 2, meanx, "-")
   xmkt  <- rowMeans(R)
 
-  sample <- cov(cbind(R, xmkt)) * (t - 1) / t
+  sample <- stats::cov(cbind(R, xmkt)) * (t - 1) / t
   covmkt <- sample[1:n, n + 1]
   varmkt <- sample[n + 1, n + 1]
   sample <- sample[1:n, 1:n]

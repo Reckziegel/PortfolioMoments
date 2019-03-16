@@ -15,8 +15,10 @@
 #' @export
 #'
 #' @examples
-#' cov_shrink_to_honey(EuStockMarkets)
-#' cov_shrink_to_honey(EUStockMarkets, portfolio = FALSE)
+#' library(PortfolioAnalytics)
+#' data(edhec)
+#' cov_shrink_to_honey(edhec)
+#' cov_shrink_to_honey(edhec, portfolio = FALSE)
 cov_shrink_to_honey <- function(R, shrink = NULL, portfolio = TRUE) {
 
   n  <- nrow(R)
@@ -34,6 +36,13 @@ cov_shrink_to_honey <- function(R, shrink = NULL, portfolio = TRUE) {
   rBar    <- (sum(sum(sample / (tmpMat * t(tmpMat)))) - p) / (p * (p - 1))
   prior   <- rBar * tmpMat * t(tmpMat)
   diag(prior) <- var
+
+  if (!is.null(colnames(R))) {
+
+    colnames(prior) <- colnames(R)
+    rownames(prior) <- colnames(R)
+
+  }
 
   if (is.null(shrink)) {
 
@@ -63,6 +72,7 @@ cov_shrink_to_honey <- function(R, shrink = NULL, portfolio = TRUE) {
   } else {
 
     shrinkage <- shrink
+
 
   }
 

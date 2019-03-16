@@ -13,7 +13,9 @@
 #' @export
 #'
 #' @examples
-#' cov_shrink_bayes_stein(EuStockMarkets)
+#' library(PortfolioAnalytics)
+#' data(edhec)
+#' cov_shrink_to_bayes_stein(edhec)
 cov_shrink_to_bayes_stein <- function(R) {
 
   R <- PerformanceAnalytics::checkData(R)
@@ -22,7 +24,7 @@ cov_shrink_to_bayes_stein <- function(R) {
   n <- ncol(R)
 
   mu       <- colMeans(R)
-  Sigma    <- cov(R)
+  Sigma    <- stats::cov(R)
   invSigma <- solve(Sigma)
 
   i <- rep(1, n)
